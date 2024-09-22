@@ -1,0 +1,97 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+main {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135.42deg,#fff,#eee6f3);
+}
+
+.animation-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.envelope {
+  position: absolute;
+  width: 400px; /* Adjust based on envelope image size */
+  height: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  transition: top 1s ease;
+}
+
+.envelope.animate {
+  top: 60%;
+}
+
+.envelope-top {
+  position: absolute;
+  width: 400px; /* Adjust based on envelope image size */
+  height: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 50;
+  transition: top 1s ease;
+}
+.envelope-top.animate {
+  top: 60%;
+}
+
+.envelope-image {
+  width: 100%;
+  height: auto;
+}
+
+.wedding-card {
+  position: absolute;
+  width: 300px; /* Card takes 100% of the viewport height */
+  height: 300px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+  overflow: hidden;
+  transition: height 1s ease, width 1s ease, top 1s ease, z-index 0s 1s;
+}
+
+.wedding-card.fullscreen {
+  height: auto !important;
+  width: 60vh;
+  top: 50% !important;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  transition: height 1s ease, width 1s ease, top 1s ease, left 1s ease;
+}
+
+.wedding-card.animate {
+  height: auto; /* Will be handled dynamically */
+  top: 30%;
+}
+
+.card-image {
+  width: 100%;
+  height: auto;
+  transition: width 1s ease, height 1s ease;
+}
+
+.card-image.fullscreen {
+  height: 100%;
+  object-fit: contain;
+}
+
+.hidden {
+  display: none;
+}
+
