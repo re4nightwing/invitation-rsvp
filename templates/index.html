@@ -154,27 +154,6 @@
     </div>
   </div>
 </div>
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-  <div class="toast-container">
-    {% for category, message in messages %}
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-      <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="opacity: 1;">
-        <div class="toast-header">
-          <i class='bx bxs-bell-ring me-1'></i>
-          <strong class="me-auto">Notification</strong>
-          <small>Just now...</small>
-          <!-- <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button> -->
-        </div>
-        <div class="toast-body">
-          {{ message }}
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-{% endif %}
-{% endwith %}
 
   <script src="{{url_for('static', filename='js/script.js')}}"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>

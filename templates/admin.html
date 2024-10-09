@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block style %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;800&display=swap');
+  body{
+    font-family: "Poppins", sans-serif;
+
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-auto">
+      <form method="POST" action="">
+        <div class="mb-3">
+          <label for="username"  class="form-label">Email address</label>
+          <input type="email" class="form-control" id="username" name="username" aria-describedby="emailHelp">
+          <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label">Password</label>
+          <input type="password" class="form-control" name="password" id="exampleInputPassword1">
+        </div>
+        <input type="hidden" name="csrf_token" value = "{{ csrf_token() }}" /> 
+        <button type="submit" class="btn btn-success">Login</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

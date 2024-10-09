@@ -1,10 +1,10 @@
 import os
-from flask import Flask, render_template, jsonify, redirect, request, flash, url_for
+from flask import Flask, render_template, jsonify, redirect, request, flash, url_for, session
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from uuid import uuid4
-from flask_wtf import CSRFProtect 
-
+from flask_wtf import CSRFProtect
+from bcrypt import checkpw
 
 load_dotenv()
 DB_USER=os.environ.get("DB_USER")
@@ -27,6 +27,15 @@ class rsvp_information(db.Model):
   email = db.Column(db.String(100), nullable=True)
   phonenumber = db.Column(db.String(100), nullable=True)
   status = db.Column(db.String(100), nullable=True)
+  created = db.Column(db.DateTime, server_default=db.func.now())
+  updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
+
+  def __repr__(self):
+    return f"<User {self.username}>"
+  
+class admin_info(db.Model):
+  username = db.Column(db.String(100), nullable=False, primary_key=True)
+  password = db.Column(db.String(100), nullable=False)
   created = db.Column(db.DateTime, server_default=db.func.now())
   updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
 
@@ -88,6 +97,38 @@ def submit_data():
     flash('User not found!', 'danger')
   
   return redirect(url_for("home_with_user", id=user_id, username=name))
+
+@app.route('/admin-login', methods=['GET', 'POST'])
+def admin_login():
+  if 'username' in session:
+    return redirect(url_for('dashboard_page'))
+  if request.method == "POST":
+    username = request.form.get('username')
+    password = request.form.get('password')
+    b_password = password.encode('utf-8')
+    admin_user = admin_info.query.filter_by(username=username).first()
+    if admin_user and checkpw(b_password, (admin_user.password).encode('utf-8')):
+      session['username'] = admin_user.username
+      flash("User Logged In Successfully.", "success")
+      return redirect(url_for('admin_login'))
+    else:
+      flash("Invalid user", "danger")
+      return redirect(url_for('admin_login'))
+  context={}
+  return render_template('admin.html', context=context)
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard_page():
+  if 'username' not in session:
+    return redirect(url_for('admin_login'))
+  context={}
+  return render_template('dashboard.html', context=context)
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('admin_login'))
 
 if __name__ == '__main__':
   app.run(host="0.0.0.0", debug=True)
