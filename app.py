@@ -121,8 +121,29 @@ def admin_login():
 def dashboard_page():
   if 'username' not in session:
     return redirect(url_for('admin_login'))
-  context={}
+  invitees = rsvp_information.query.all()
+  context={
+    "invitees" : invitees
+  }
   return render_template('dashboard.html', context=context)
+
+@app.route('/add-invitee', methods=['POST'])
+def add_invitee():
+  invitee_name = request.form.get('invitee-name')
+  if(invitee_name):
+    exist_user = rsvp_information.query.filter_by(username=invitee_name).first()
+    if exist_user:
+      flash(f"User with the name {exist_user} exists", "danger")
+    else:
+      try:
+        new_invitee = rsvp_information(id=make_unique(), username=invitee_name)
+        db.session.add(new_invitee)
+        db.session.commit()
+        flash(f"User {invitee_name} invited", "success")
+      except Exception as e:
+        print(e)
+        flash(f"An error occurred while updating the database.", "danger")
+  return redirect(url_for('dashboard_page'))
 
 @app.route('/logout')
 def logout():
