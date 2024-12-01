@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from uuid import uuid4
 from flask_wtf import CSRFProtect
 from bcrypt import checkpw
+from PIL import Image, ImageDraw, ImageFont
 
 load_dotenv()
 DB_USER=os.environ.get("DB_USER")
@@ -46,6 +47,48 @@ def make_unique():
     ident = uuid4().__str__()
     return ident
 
+def create_invitation(image_id, input_image_path, output_dir, name, font_path, y_position, font_size):
+  if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+    # Load the font
+  try:
+    font = ImageFont.truetype(font_path, font_size)
+  except IOError:
+    print("Font file not found. Please check the font path.")
+    return
+
+  try:
+    image = Image.open(input_image_path)
+
+    if image.mode != 'RGB':
+      image = image.convert('RGB')
+
+    draw = ImageDraw.Draw(image)
+
+    image_width, image_height = image.size
+
+    text_bbox = draw.textbbox((0, 0), name, font=font)  # Get bounding box
+    text_width = text_bbox[2] - text_bbox[0]  # Width of the text
+    x_position = (image_width - text_width) // 2  # Center text horizontally
+
+    draw.text((x_position, y_position), name, font=font, fill="black")
+
+    max_width = 1200
+    max_height = 1200
+    image.thumbnail((max_width, max_height))  # This will keep the aspect ratio intact
+
+    output_path = os.path.join(output_dir, f"invitation_{image_id}.png")
+    image.save(output_path, format='JPEG', quality=80, optimize=True)
+
+    print(f"Saved: {output_path}")
+    return 1
+  except Exception as e:
+    print(f'An error occurred: {str(e)}')
+    return 0
+
+
+
 ######## 404 page
 @app.errorhandler(404)
 def page_not_found(e):
@@ -54,15 +97,20 @@ def page_not_found(e):
   }
   return render_template('404.html', context=context), 404
 
-""" @app.route('/', methods=['GET', 'POST'])
+""" 
+@app.route('/', methods=['GET', 'POST'])
 def home():
-  return render_template('index.html') """
+  return render_template('index.html') 
+"""
 
 @app.route('/<string:id>/<string:username>', methods=['GET', 'POST'])
 def home_with_user(id, username):
   user = rsvp_information.query.filter_by(id=id).first()
   if not user:
-    return redirect(url_for("page_not_found"))
+    context = {
+      'msg': "Invalid User"
+    }
+    return render_template('404.html', context=context), 404
   context = {
     'id': user.id,
     'username': user.username,
@@ -136,13 +184,34 @@ def add_invitee():
       flash(f"User with the name {exist_user} exists", "danger")
     else:
       try:
-        new_invitee = rsvp_information(id=make_unique(), username=invitee_name)
-        db.session.add(new_invitee)
-        db.session.commit()
-        flash(f"User {invitee_name} invited", "success")
+        new_id = make_unique()
+        new_invitee = rsvp_information(id=new_id, username=invitee_name)
+        invitation = create_invitation(new_id, "static/img/template.jpg", "static/img/invitations/", invitee_name, "static/other/Birthstone-Regular.ttf", 850, 70)
+        if invitation:
+          db.session.add(new_invitee)
+          db.session.commit()
+          flash(f"User {invitee_name} invited", "success")
+        else:
+          flash(f"An error occurred while creating the invitation.", "danger")
       except Exception as e:
         print(e)
         flash(f"An error occurred while updating the database.", "danger")
+  return redirect(url_for('dashboard_page'))
+
+@app.route('/delete-invitee', methods=['POST'])
+def delete_invitee():
+  invitee_id = request.form.get('user-id')
+  if(invitee_id):
+    exist_user = rsvp_information.query.filter_by(id=invitee_id).first()
+    if exist_user:
+      try:
+        db.session.delete(exist_user)
+        db.session.commit()
+        flash(f"User {exist_user.username} deleted", "success")
+      except Exception as e:
+        flash(f'An error occurred: {str(e)}', 'danger')
+    else:
+      flash(f"User with the id {invitee_id} does not exist", "danger")
   return redirect(url_for('dashboard_page'))
 
 @app.route('/logout')

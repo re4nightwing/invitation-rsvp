@@ -40,7 +40,14 @@
         <td>{{invitee.email}}</td>
         <td>{{invitee.phonenumber}}</td>
         <td>{{invitee.status}}</td>
-        <td><a href="{{url_for('home_with_user', id=invitee.id, username=invitee.username)}}" target="_blank">Copy Link</td>
+        <td>
+          <a href="{{url_for('home_with_user', id=invitee.id, username=invitee.username)}}" target="_blank">Copy Link</a>
+          <form action="/delete-invitee" method="POST">
+            <input type="hidden" name="user-id" value="{{invitee.id}}">
+            <input type="hidden" name="csrf_token" value = "{{ csrf_token() }}" /> 
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        </td>
       </tr>
       {% endfor %}
     </tbody>

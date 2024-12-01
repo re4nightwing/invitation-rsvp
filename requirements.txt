@@ -15,3 +15,9 @@ SQLAlchemy==2.0.35
 typing_extensions==4.12.2
 Werkzeug==3.0.4
 WTForms==3.1.2
+certifi==2024.8.30
+charset-normalizer==3.4.0
+idna==3.10
+pillow==11.0.0
+requests==2.32.3
+urllib3==2.2.3
